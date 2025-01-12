@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tool Management System</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 20px;
+            background-color: #f4f6f9;
+            color: #333;
+        }
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            font-size: 2rem;
+            margin-bottom: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            background-color: #ffffff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #3498db;
+            color: #fff;
+            font-weight: bold;
+        }
+        td {
+            background-color: #f9f9f9;
+        }
+        .toolbar {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            align-items: center;
+        }
+        .search-input {
+            padding: 8px;
+            width: 300px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .toolbar button {
+            padding: 10px 20px;
+            font-size: 14px;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        .add-tool {
+            background-color: #28a745;
+        }
+        .assign-tool {
+            background-color: #007bff;
+        }
+        .add-tool:hover {
+            background-color: #218838;
+        }
+        .assign-tool:hover {
+            background-color: #0056b3;
+        }
+        .form-container {
+            display: none;
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            margin-top: 30px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .form-container h2 {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            color: #333;
+        }
+        .form-container label {
+            font-weight: bold;
+            margin-bottom: 5px;
+            display: block;
+        }
+        .form-container input, .form-container select {
+            width: 100%;
+            padding: 8px;
+            margin: 5px 0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .form-container button {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            font-size: 14px;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        .form-container button:hover {
+            background-color: #0056b3;
+        }
+        .pagination {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+        }
+        .pagination button {
+            padding: 8px 16px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .pagination button:hover {
+            background-color: #2980b9;
+        }
+        .pagination span {
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Tool Management System</h1>
+
+    <div class="toolbar">
+        <input type="text" class="search-input" placeholder="Search tools..." oninput="filterTable()">
+        <button class="add-tool">View history</button>
+        <button class="assign-tool" onclick="showForm()">Assign Tool</button>
+    </div>
+
+    <div class="form-container" id="assignForm">
+        <h2>Assign Tool</h2>
+        <form id="assignToolForm" onsubmit="assignTool(event)">
+            <label for="employeeName">Employee Name:</label>
+            <select id="employeeName" name="employeeName" required>
+                <option value="Brighton Matolokosh">Brighton Matolokosh</option>
+                <option value="Caphas Tembo">Caphas Tembo</option>
+            </select>
+
+            <label for="projectName">Project Name:</label>
+            <select id="projectName" name="projectName" required>
+                <option value="Hazida Limited">Hazida Limited</option>
+                <option value="Hazida Motors">Hazida Motors</option>
+            </select>
+
+            <label for="toolName">Tool Name:</label>
+            <select id="toolName" name="toolName" required>
+                <option value="GRINDER">GRINDER</option>
+                <option value="WELDING SQUARE">WELDING SQUARE</option>
+                <option value="COMBINATION SQUARE">COMBINATION SQUARE</option>
+                <option value="WELDING SHIELD">WELDING SHIELD</option>
+                <option value="HAND SAW">HAND SAW</option>
+                <option value="SANDING MACHINE">SANDING MACHINE</option>
+                <option value="STAPLE GUN">STAPLE GUN</option>
+                <option value="TENAN SAW">TENAN SAW</option>
+                <option value="CIRCULAR SAW">CIRCULAR SAW</option>
+                <option value="JIK SAW">JIK SAW</option>
+                <option value="MEASURING TAPE">MEASURING TAPE</option>
+                <option value="PLANE">PLANE</option>
+                <option value="CROW BAR">CROW BAR</option>
+                <option value="BABY GRINDER">BABY GRINDER</option>
+            </select>
+
+            <button type="submit">Submit Assignment</button>
+        </form>
+    </div>
+
+    <table id="toolTable">
+        <thead>
+            <tr>
+                <th>Bin ID</th>
+                <th>Tool Name</th>
+                <th>Current Holder</th>
+                <th>Current Location</th>
+                <th>Assigned Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>001</td>
+                <td>GRINDER</td>
+                <td>John Doe</td>
+                <td>Workshop A</td>
+                <td>2023-01-10</td>
+            </tr>
+            <tr>
+                <td>002</td>
+                <td>HAND SAW</td>
+                <td>Jane Smith</td>
+                <td>Storage Room</td>
+                <td>2023-05-20</td>
+            </tr>
+            <tr>
+                <td>003</td>
+                <td>WELDING SHIELD</td>
+                <td>Mike Johnson</td>
+                <td>Workshop B</td>
+                <td>2022-11-15</td>
+            </tr>
+            <!-- Add additional tool rows here -->
+            <tr>
+                <td>004</td>
+                <td>WELDING SQUARE</td>
+                <td>Emily Davis</td>
+                <td>Workshop C</td>
+                <td>2024-01-11</td>
+            </tr>
+            <tr>
+                <td>005</td>
+                <td>COMBINATION SQUARE</td>
+                <td>Alex Green</td>
+                <td>Workshop C</td>
+                <td>2024-01-11</td>
+            </tr>
+            <tr>
+                <td>006</td>
+                <td>SANDING MACHINE</td>
+                <td>Lisa Brown</td>
+                <td>Workshop D</td>
+                <td>2024-01-11</td>
+            </tr>
+            <tr>
+                <td>007</td>
+                <td>STAPLE GUN</td>
+                <td>James White</td>
+                <td>Storage Room</td>
+                <td>2024-01-11</td>
+            </tr>
+            <tr>
+                <td>008</td>
+                <td>TENAN SAW</td>
+                <td>Michael Black</td>
+                <td>Workshop B</td>
+                <td>2024-01-11</td>
+            </tr>
+            <tr>
+                <td>009</td>
+                <td>CIRCULAR SAW</td>
+                <td>Susan Blue</td>
+                <td>Workshop A</td>
+                <td>2024-01-11</td>
+            </tr>
+            <tr>
+                <td>010</td>
+                <td>JIK SAW</td>
+                <td>David Gray</td>
+                <td>Workshop D</td>
+                <td>2024-01-11</td>
+            </tr>
+            <tr>
+                <td>011</td>
+                <td>MEASURING TAPE</td>
+                <td>Patricia Orange</td>
+                <td>Storage Room</td>
+                <td>2024-01-11</td>
+            </tr>
+            <tr>
+                <td>012</td>
+                <td>PLANE</td>
+                <td>Richard Yellow</td>
+                <td>Workshop A</td>
+                <td>2024-01-11</td>
+            </tr>
+            <tr>
+                <td>013</td>
+                <td>CROW BAR</td>
+                <td>Jessica Purple</td>
+                <td>Workshop C</td>
+                <td>2024-01-11</td>
+            </tr>
+            <tr>
+                <td>014</td>
+                <td>BABY GRINDER</td>
+                <td>Tom Pink</td>
+                <td>Workshop B</td>
+                <td>2024-01-11</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="pagination">
+        <button onclick="previousPage()">Previous</button>
+        <span id="pageInfo">Page 1 of 1</span>
+        <button onclick="nextPage()">Next</button>
+    </div>
+
+    <script>
+        const rowsPerPage = 10;
+        let currentPage = 1;
+
+        function filterTable() {
+            const input = document.querySelector('.search-input');
+            const filter = input.value.toLowerCase();
+            const table = document.getElementById('toolTable');
+            const rows = table.getElementsByTagName('tr');
+
+            for (let i = 1; i < rows.length; i++) {
+                const cells = rows[i].getElementsByTagName('td');
+                let match = false;
+
+                for (let j = 0; j < cells.length; j++) {
+                    if (cells[j].textContent.toLowerCase().includes(filter)) {
+                        match = true;
+                        break;
+                    }
+                }
+
+                rows[i].style.display = match ? '' : 'none';
+            }
+        }
+
+        function showForm() {
+            const form = document.getElementById('assignForm');
+            form.style.display = form.style.display === 'block' ? 'none' : 'block';
+        }
+
+        function assignTool(event) {
+            event.preventDefault();
+
+            const employeeName = document.getElementById('employeeName').value;
+            const projectName = document.getElementById('projectName').value;
+            const toolName = document.getElementById('toolName').value;
+            const assignedDate = new Date().toLocaleDateString();
+
+            const table = document.getElementById('toolTable');
+            const rows = table.getElementsByTagName('tr');
+
+            for (let i = 1; i < rows.length; i++) {
+                const cells = rows[i].getElementsByTagName('td');
+                const toolCell = cells[1];
+                const currentHolderCell = cells[2];
+                const currentLocationCell = cells[3];
+                const assignedDateCell = cells[4];
+
+                if (toolCell.textContent === toolName) {
+                    currentHolderCell.textContent = employeeName;
+                    currentLocationCell.textContent = projectName;
+                    assignedDateCell.textContent = assignedDate;
+                    break;
+                }
+            }
+
+            showForm();
+        }
+    </script>
+
+</body>
+</html>

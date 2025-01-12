@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Sheet</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 0;
+        }
+        header {
+            background-color: #4CAF50;
+            color: white;
+            text-align: center;
+            padding: 20px;
+        }
+        .button-container {
+            margin: 20px;
+            display: flex;
+            justify-content: flex-start;
+        }
+        .button-container button,
+        .button-container select {
+            margin-right: 10px;
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        .button-container button:hover,
+        .button-container select:hover {
+            background-color: #45a049;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px auto;
+            max-height: 400px; /* Set max height to allow scrolling */
+            overflow-y: auto; /* Allow vertical scrolling */
+            display: block; /* Make the table block to handle overflow */
+        }
+        th, td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+        th {
+            background-color: #4CAF50;
+            color: white;
+            position: sticky; /* Make the header sticky */
+            top: 0; /* Keep the header at the top while scrolling */
+            z-index: 1; /* Ensure header is above content */
+        }
+        th {
+            width: 300px;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.4);
+        }
+        .modal-content {
+            background-color: white;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 50%;
+        }
+        .close {
+            color: #aaa;
+            font-size: 28px;
+            font-weight: bold;
+            float: right;
+            cursor: pointer;
+        }
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        #employeeDropdown {
+            display: none;
+        }
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: #4CAF50;
+            min-width: 160px;
+            box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
+            z-index: 1;
+        }
+        .dropdown-content button {
+            color: white;
+            padding: 12px 16px;
+            text-align: left;
+            background-color: #4CAF50;
+            border: none;
+            width: 100%;
+        }
+        .dropdown-content button:hover {
+            background-color: #45a049;
+        }
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
+        .dropdown button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            cursor: pointer;
+        }
+        .dropdown button:hover {
+            background-color: #090b09;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Task Sheet</h1>
+</header>
+
+<div class="button-container">
+    <select id="filterProjectDropdown">
+        <option value="none">None</option>
+        <!-- Project options will be populated dynamically -->
+    </select>
+    <button id="viewAllBtn">All Tasks</button>
+    <button id="addTaskBtn">Add Task</button>
+    <button id="viewCompletedBtn">View Completed Tasks</button>
+</div>
+
+<table id="taskTable">
+    <thead>
+        <tr>
+            <th>Project Name</th>
+            <th>Task Description</th>
+            <th>Location</th>
+            <th>Priority</th>
+            <th>Status</th>
+            <th>Assigned To</th>
+            <th>Start Date</th>
+            <th>End Date</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        <!-- Task rows will be added dynamically here -->
+    </tbody>
+</table>
+
+<!-- Modal for adding tasks -->
+<div class="modal" id="taskModal">
+    <div class="modal-content">
+        <span class="close" id="closeModal">&times;</span>
+        <h2>Add Task</h2>
+        <form id="taskForm">
+            <label for="projectName">Project Name:</label>
+            <select id="projectName" required></select><br><br>
+
+            <label for="taskDescription">Task Description:</label>
+            <input type="text" id="taskDescription" required><br><br>
+
+            <label for="location">Location:</label>
+            <input type="text" id="location" required><br><br>
+
+            <label for="priority">Priority:</label>
+            <select id="priority">
+                <option value="High">High</option>
+                <option value="Medium">Medium</option>
+                <option value="Low">Low</option>
+            </select><br><br>
+
+            <button type="submit">Save Task</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    const addTaskBtn = document.getElementById('addTaskBtn');
+    const taskModal = document.getElementById('taskModal');
+    const closeModal = document.getElementById('closeModal');
+    const taskForm = document.getElementById('taskForm');
+    const taskTable = document.getElementById('taskTable').getElementsByTagName('tbody')[0];
+    const viewCompletedBtn = document.getElementById('viewCompletedBtn');
+    const viewAllBtn = document.getElementById('viewAllBtn');
+    const filterProjectDropdown = document.getElementById('filterProjectDropdown');
+
+    const projectNames = [
+        "Hazida Limited", "Hazida Motors", "Hazida Foods", "Freight and Passengers", 
+        "Lumumba Showroom Ezone", "Manda Hill Ezone Store", "Cento Ezone Store", 
+        "Cosmopolitan Ezone Store", "Trident Ezone Store", "Kitwe Ezone Store", 
+        "Livingstone Ezone Store", "Mr Mussa", "Mr Ebrahim", "Madam Shirin", 
+        "Mr Ishmil", "Mr Shabbir", "Mr Riaz", "Mr Faiyaz", "Northmeads Flats 1", 
+        "Northmeads Flats 2", "Fields Works"
+    ];
+
+    const employees = [
+        "BRIGHTON MATOLOKOSH", "CAPHAS TEMBO", "CLISHA MAMBILIMA", "DABSON DAKA", 
+        "DANNY MVULA", "JAMES DAKA", "JOSEPH TEMBO", "LUCKSON PHIRI", "MICHEAL LOBELA", 
+        "OBERT SIAME", "DOMINIC SAKALA", "PETER MAWERE", "SAVIOUR PHIRI", 
+        "TEMBEYA SAKALA", "KEVIN SIAME"
+    ];
+
+    let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+    let resources = JSON.parse(localStorage.getItem('resources')) || [];
+
+    addTaskBtn.addEventListener('click', () => {
+        taskModal.style.display = 'block';
+        populateProjectDropdown(); // Populating project dropdown when modal is shown
+    });
+
+    closeModal.addEventListener('click', () => {
+        taskModal.style.display = 'none';
+    });
+
+    taskForm.addEventListener('submit', function(event) {
+        event.preventDefault();
+
+        const projectName = document.getElementById('projectName').value;
+        const taskDescription = document.getElementById('taskDescription').value;
+        const location = document.getElementById('location').value;
+        const priority = document.getElementById('priority').value;
+
+        const newTask = {
+            projectName,
+            taskDescription,
+            location,
+            priority,
+            assignedTo: '',  // Initially no resource assigned
+            status: 'Inactive',
+            startDate: '',
+            endDate: ''
+        };
+
+        tasks.push(newTask);
+        saveTasks();
+        updateTable();
+        taskModal.style.display = 'none';
+        taskForm.reset();
+    });
+
+    function saveTasks() {
+        localStorage.setItem('tasks', JSON.stringify(tasks));
+    }
+
+    function updateTable(filteredTasks = tasks) {
+        taskTable.innerHTML = '';
+        filteredTasks.forEach((task, index) => {
+            const row = taskTable.insertRow();
+            row.insertCell(0).innerText = task.projectName;
+            row.insertCell(1).innerText = task.taskDescription;
+            row.insertCell(2).innerText = task.location;
+            row.insertCell(3).innerText = task.priority;
+            row.insertCell(4).innerText = task.status;
+
+            // Assigned To column with text input
+            const assignedToCell = row.insertCell(5);
+            const assignedToInput = document.createElement('input');
+            assignedToInput.type = 'text';
+            assignedToInput.value = task.assignedTo || ''; // Set the current value if exists
+            assignedToInput.placeholder = 'Type name here...';
+            assignedToInput.addEventListener('input', (event) => {
+                task.assignedTo = event.target.value;
+                saveTasks();
+            });
+            assignedToCell.appendChild(assignedToInput);
+
+            row.insertCell(6).innerText = task.startDate || 'N/A';
+            row.insertCell(7).innerText = task.endDate || 'N/A';
+
+            // Only add actions if the task is not completed
+            if (task.status !== 'Completed') {
+                const actionsCell = row.insertCell(8);
+                const dropdown = document.createElement('div');
+                dropdown.classList.add('dropdown');
+                const dropdownButton = document.createElement('button');
+                dropdownButton.textContent = 'Action';
+                dropdownButton.classList.add('button');
+                const dropdownContent = document.createElement('div');
+                dropdownContent.classList.add('dropdown-content');
+
+                const startButton = document.createElement('button');
+                startButton.textContent = 'Start';
+                startButton.addEventListener('click', () => {
+                    task.startDate = new Date().toLocaleDateString();
+                    task.status = 'Active';
+                    saveTasks();
+                    updateTable();
+                });
+
+                const completeButton = document.createElement('button');
+                completeButton.textContent = 'Complete';
+                completeButton.addEventListener('click', () => {
+                    task.endDate = new Date().toLocaleDateString();
+                    task.status = 'Completed';
+                    saveTasks();
+                    updateTable();
+                });
+
+                dropdownContent.appendChild(startButton);
+                dropdownContent.appendChild(completeButton);
+                dropdown.appendChild(dropdownButton);
+                dropdown.appendChild(dropdownContent);
+                actionsCell.appendChild(dropdown);
+            }
+        });
+    }
+
+    // Show all tasks when "All Tasks" button is clicked
+    viewAllBtn.addEventListener('click', () => {
+        const activeTasks = tasks.filter(task => task.status !== 'Completed');
+        updateTable(activeTasks);
+    });
+
+    // Show only completed tasks when the "Completed Tasks" button is clicked
+    viewCompletedBtn.addEventListener('click', () => {
+        const selectedProject = filterProjectDropdown.value;
+        const completedTasks = tasks.filter(task => task.status === 'Completed' && (selectedProject !== 'none' ? task.projectName === selectedProject : true));
+        updateTable(completedTasks);
+    });
+
+    // Populate project dropdown
+    function populateProjectDropdown() {
+        const projectDropdown = document.getElementById('projectName');
+        projectDropdown.innerHTML = projectNames.map(project => 
+            `<option value="${project}">${project}</option>`
+        ).join('');
+    }
+
+    // Populate the filter dropdown with project names, including "None"
+    function populateFilterDropdown() {
+        filterProjectDropdown.innerHTML = `<option value="none">None</option>` + projectNames.map(project => 
+            `<option value="${project}">${project}</option>`
+        ).join('');
+    }
+
+    // When the filter is changed, update the table immediately
+    filterProjectDropdown.addEventListener('change', (e) => {
+        const selectedProject = e.target.value;
+        const filteredTasks = selectedProject !== 'none'
+            ? tasks.filter(task => task.projectName === selectedProject)
+            : tasks;
+        updateTable(filteredTasks);
+    });
+
+    // Initial update of the table with all tasks and populate filter dropdown
+    updateTable();
+    populateFilterDropdown();
+</script>
+
+</body>
+</html>

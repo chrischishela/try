@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            
+    font-family: Arial, sans-serif;
+    margin: 0;
+    background-color: #f4f4f4;
+}
+
+.sidebar {
+    width: 250px;
+    background-color: #2c3e50;
+    color: white;
+    position: fixed;
+    height: 100%;
+    padding-top: 20px;
+}
+
+.sidebar h2 {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.sidebar ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.sidebar ul li {
+    padding: 15px;
+    text-align: left;
+    border-bottom: 1px solid #34495e;
+}
+
+.sidebar ul li a {
+    color: white;
+    text-decoration: none;
+}
+
+.sidebar ul li a i {
+    margin-right: 10px;
+}
+
+.sidebar ul li:hover {
+    background-color: #34495e;
+}
+
+.main-content {
+    margin-left: 250px;
+    padding: 20px;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #2980b9;
+    color: white;
+    padding: 10px 20px;
+    position: sticky;  /* Make the header sticky */
+    top: 0;            /* Stick it to the top of the viewport */
+    z-index: 1000;     /* Ensure it stays on top of other elements */
+}
+
+.notification {
+    position: relative;
+    cursor: pointer;
+}
+
+.notification i {
+    font-size: 24px;
+    color: white;
+}
+
+.badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: red;
+    color: white;
+    font-size: 12px;
+    padding: 2px 6px;
+    border-radius: 50%;
+    display: none; /* Hidden by default */
+}
+
+#notificationsContainer {
+    position: absolute;
+    top: 25px;
+    right: 0;
+    background-color: white;
+    border: 1px solid #ccc;
+    padding: 10px;
+    display: none;
+    width: 200px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    z-index: 10;
+}
+
+#notificationsList {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+#notificationsList li {
+    padding: 5px 0;
+}
+
+.cards {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+}
+
+.card {
+    background: white;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    padding: 20px;
+    text-align: center;
+    width: 30%;
+}
+
+.card i {
+    font-size: 50px;
+    margin-bottom: 10px;
+}
+
+.card h3 {
+    margin: 10px 0;
+}
+
+.card a {
+    text-decoration: none;
+    color: #2980b9;
+}
+
+.table-section {
+    margin-top: 40px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    background: white;
+    border-radius: 5px;
+    overflow: hidden;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+th,
+td {
+    text-align: left;
+    padding: 15px;
+    border-bottom: 1px solid #ddd;
+}
+
+th {
+    background-color: #2980b9;
+    color: white;
+}
+
+tr:hover {
+    background-color: #f1f1f1;
+}
+
+    </style>
+</head>
+
+<body>
+    <div class="sidebar">
+        <h2>IMS Portal</h2>
+        <ul>
+            <li><a href="#"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+            <li><a href="employee_task_manager.html"><i class="fas fa-users"></i> Staff</a></li>
+            <li><a href="Resource.html"><i class="fas fa-box"></i> Material</a></li>
+            <li><a href="Tasksheet.html"><i class="fas fa-box"></i> Tasks</a></li>
+            <li><a href="Tool.html"><i class="fas fa-box"></i> Tools</a></li>
+            <li><a href="Chris.html"><i class="fas fa-box"></i> Chris</a></li>
+            <li><a href="purchases.html"><i class="fas fa-sign-out-alt"></i> Purchases</a></li>
+            <li><a href="minutes.html"><i class="fas fa-sign-out-alt"></i> minutes</a></li>
+            <li><a href="index.html"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+        </ul>
+    </div>
+
+    <div class="main-content">
+        <div class="header">
+            <h1>Admin Dashboard</h1>
+            <div style="display: flex; align-items: center;">
+                <div class="notification" style="position: relative;">
+                    <i class="fas fa-bell" id="notificationIcon" style="cursor: pointer;"></i>
+                    <span id="notificationBadge" class="badge" style="display: none;"></span>
+
+                    <!-- Notification dropdown -->
+                    <div id="notificationsContainer" style="position: absolute; top: 20px; right: 0; background-color: white; border: 1px solid #ccc; padding: 10px; display: none; width: 200px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); z-index: 10;">
+                        <ul id="notificationsList" style="list-style: none; padding: 0; margin: 0;"></ul>
+                    </div>
+                </div>
+                <span style="margin-left: 20px;">Welcome, chishela
+                    <button onclick="window.location.href='login.html';">Logout</button>
+                </span>
+            </div>
+        </div>
+
+        <div class="cards">
+            <div class="card">
+                <i class="fas fa-user-plus" style="color: #e74c3c;"></i>
+                <h3>Staff</h3>
+                <a href="employee_task_manager.html">Click here to view</a>
+            </div>
+
+            <div class="card">
+                <i class="fas fa-wrench" style="color: #8e44ad;"></i>
+                <h3>Tools</h3>
+                <a href="#">Click here to view</a>
+            </div>
+
+            <div class="card">
+                <i class="fas fa-box" style="color: #f39c12;"></i>
+                <h3>Material</h3>
+                <a href="#">Click here to view</a>
+            </div>
+        </div>
+
+        <div class="table-section">
+            <h2>Unassigned Staff</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Position</th>
+                    </tr>
+                </thead>
+                <tbody id="unassignedStaffTable"></tbody>
+            </table>
+        </div>
+
+        <div class="table-section">
+            <h2>Active Tasks</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Project Name</th>
+                        <th>Task Name</th>
+                        <th>Assigned To</th>
+                        <th>Start Date</th>
+                        <th>Priority</th>
+                    </tr>
+                </thead>
+                <tbody id="activeTasksTable"></tbody>
+            </table>
+        </div>
+    </div>
+    
+
+
+
+
+    <script src="https://www.gstatic.com/firebasejs/9.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.10.0/firebase-auth.js"></script>
+
+<script>
+    // Initialize Firebase
+    const firebaseConfig = {
+        apiKey: "AIzaSyDxQ9ai-C2RlJy27p_kdHkXeqz1Cpbyh4",
+        authDomain: "project-app-58ff6.firebaseapp.com",
+        projectId: "project-app-58ff6",
+        storageBucket: "project-app-58ff6.appspot.com",
+        messagingSenderId: "586923989952",
+        appId: "1:586923989952:web:72b300dbc00d830e2e462"
+    };
+    const app = firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+
+    // Ensure only authenticated users access the dashboard
+    auth.onAuthStateChanged((user) => {
+        if (!user) {
+            alert("You are not logged in! Redirecting to login page.");
+            window.location.href = "login.html"; // Replace with your login page path
+        }
+    });
+
+    // Logout function
+    function logout() {
+        auth.signOut()
+            .then(() => {
+                alert("Logged out successfully!");
+                window.location.href = "login.html"; // Redirect to login page
+            })
+            .catch((error) => {
+                console.error("Logout failed:", error.message);
+            });
+    }
+
+    // Fetch Unassigned Staff
+    function fetchUnassignedStaff() {
+        const employees = JSON.parse(localStorage.getItem('employees')) || [];
+        const unassignedEmployees = employees.filter(employee => employee.status === 'Unassigned');
+        const tableBody = document.getElementById('unassignedStaffTable');
+        tableBody.innerHTML = '';
+        unassignedEmployees.forEach(employee => {
+            const row = tableBody.insertRow();
+            row.insertCell(0).innerText = employee.name;
+            row.insertCell(1).innerText = employee.position;
+        });
+    }
+
+    // Fetch Active Tasks
+    function fetchActiveTasks() {
+        const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+        const activeTasks = tasks.filter(task => task.status === 'Active');
+        const tableBody = document.getElementById('activeTasksTable');
+        tableBody.innerHTML = '';
+        activeTasks.forEach(task => {
+            const row = tableBody.insertRow();
+            row.insertCell(0).innerText = task.projectName;
+            row.insertCell(1).innerText = task.taskDescription;
+            row.insertCell(2).innerText = task.assignedTo;
+            row.insertCell(3).innerText = task.startDate;
+            row.insertCell(4).innerText = task.priority;
+        });
+    }
+
+    // Update Notifications
+    function updateNotifications() {
+        const notifications = JSON.parse(localStorage.getItem('notifications')) || [];
+        const badge = document.getElementById('notificationBadge');
+        const notificationsList = document.getElementById('notificationsList');
+
+        if (notifications.length > 0) {
+            badge.textContent = notifications.length;
+            badge.style.display = 'inline';
+            notificationsList.innerHTML = '';
+
+            notifications.forEach((notification, index) => {
+                const listItem = document.createElement('li');
+                const message = notification.message || "No message available";
+                listItem.innerText = message;
+                const markReadButton = document.createElement('button');
+                markReadButton.textContent = 'Mark as Read';
+                markReadButton.style.marginLeft = '10px';
+                markReadButton.onclick = () => markAsRead(index);
+                listItem.appendChild(markReadButton);
+                notificationsList.appendChild(listItem);
+            });
+        } else {
+            badge.style.display = 'none';
+            notificationsList.innerHTML = '<li>No new notifications</li>';
+        }
+    }
+
+    function markAsRead(index) {
+        const notifications = JSON.parse(localStorage.getItem('notifications')) || [];
+        notifications.splice(index, 1);
+        localStorage.setItem('notifications', JSON.stringify(notifications));
+        updateNotifications();
+    }
+
+    function taskStarted(taskId) {
+        const notifications = JSON.parse(localStorage.getItem('notifications')) || [];
+        notifications.push({ id: taskId, message: `Task ${taskId} has started.` });
+        localStorage.setItem('notifications', JSON.stringify(notifications));
+        updateNotifications();
+    }
+
+    function taskCompleted(taskId) {
+        const notifications = JSON.parse(localStorage.getItem('notifications')) || [];
+        notifications.push({ id: taskId, message: `Task ${taskId} is completed.` });
+        localStorage.setItem('notifications', JSON.stringify(notifications));
+        updateNotifications();
+    }
+
+    function newPurchase(item) {
+        const notifications = JSON.parse(localStorage.getItem('notifications')) || [];
+        notifications.push({ id: item.id, message: `New purchase made: ${item.name}` });
+        localStorage.setItem('notifications', JSON.stringify(notifications));
+        updateNotifications();
+    }
+
+    function simulatePurchase() {
+        const newItem = { id: 1, name: 'New Material' };
+        newPurchase(newItem);
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        if (!localStorage.getItem('notifications')) {
+            localStorage.setItem('notifications', JSON.stringify([
+                { id: 1, message: 'Task A is overdue.' },
+                { id: 2, message: 'New material added to inventory.' },
+                { id: 3, message: 'Employee X has been unassigned.' }
+            ]));
+        }
+
+        fetchUnassignedStaff();
+        fetchActiveTasks();
+        updateNotifications();
+
+        taskStarted(4);
+        taskCompleted(5);
+        simulatePurchase();
+
+        const badge = document.getElementById('notificationBadge');
+        const notificationsContainer = document.getElementById('notificationsContainer');
+
+        badge.addEventListener('click', () => {
+            notificationsContainer.style.display = notificationsContainer.style.display === 'block' ? 'none' : 'block';
+        });
+    });
+</script>
+
+    
+
+</body>
+
+</html>

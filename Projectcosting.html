@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Purchases</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            color: #333;
+            margin: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #007bff;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: center;
+        }
+
+        th {
+            background-color: #007bff;
+            color: #fff;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+            margin: 5px 0;
+        }
+
+        .actions {
+            text-align: right;
+            margin-top: 20px;
+        }
+
+        button {
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .total-purchases {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            margin-top: 10px;
+            font-size: 1.2rem;
+            color: #333;
+        }
+
+        .total-purchases span {
+            font-weight: bold;
+            margin-left: 10px;
+            color: #007bff;
+        }
+
+        .total-purchases i {
+            font-size: 1.5rem;
+            color: #28a745;
+            margin-right: 10px;
+        }
+
+        .task-total {
+            margin-top: 20px;
+            font-size: 1.2rem;
+            color: #333;
+        }
+
+        .button-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.4);
+            padding-top: 60px;
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 400px;
+            border-radius: 10px;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Purchases </h1>
+
+        <!-- Row of buttons -->
+        <div class="button-row">
+            <button id="toggleFormBtn">Add New Entry</button>
+            <button id="archiveBtn">Archive Monthly Purchases</button> <!-- Archive button -->
+        </div>
+
+        <!-- Hidden form -->
+        <form id="costingForm">
+            <label>Date:</label>
+            <input type="date" id="date" required>
+
+            <label>Particular:</label>
+            <input type="text" id="particular" placeholder="e.g., Solar light" required>
+
+            <label>Task:</label>
+            <input type="text" id="task" placeholder="e.g., front yard light" required>
+
+            <label>Supplier:</label>
+            <input type="text" id="supplier" placeholder="e.g., Hardware Electricals" required>
+
+            <label>VAT:</label>
+            <select id="vat">
+                <option value="No">No</option>
+                <option value="Yes">Yes</option>
+            </select>
+
+            <label>Project:</label>
+            <input type="text" id="project" placeholder="e.g., HAZIDA LIMITED" required>
+
+            <label>Payee:</label>
+            <input type="text" id="payee" placeholder="e.g., HAZIDA LIMITED" required>
+
+            <label>Quantity:</label>
+            <input type="number" id="qty" placeholder="Enter quantity" required>
+
+            <label>Amount (per item):</label>
+            <input type="number" id="amount" placeholder="Enter amount" required>
+
+            <div class="actions">
+                <button type="button" id="addRowBtn">Add Entry</button>
+            </div>
+        </form>
+
+        <!-- Total Purchases Display -->
+        <div class="total-purchases">
+            <i class="fas fa-dollar-sign"></i>
+            Total Purchases: 
+            <span id="totalPurchases">ZMW 0.00</span>
+        </div>
+
+        <!-- Task-specific total spending -->
+        <div class="task-total">
+            <label for="taskSelect">Select Task to View Total:</label>
+            <select id="taskSelect">
+                <option value="">--Select Task--</option>
+            </select>
+            <div id="taskSpending"></div>
+        </div>
+
+        <!-- Table for displaying costing -->
+        <table>
+            <thead>
+                <tr>
+                    <th>DATE</th>
+                    <th>TASK ID</th>
+                    <th>PROJECT NAME</th>
+                    <th>PARTICULAR</th>
+                    <th>TASK</th>
+                    <th>SUPPLIER</th>
+                    <th>VAT</th>
+                    <th>PAYEE</th>
+                    <th>QTY</th>
+                    <th>AMOUNT</th>
+                    <th>TOTAL</th>
+                </tr>
+            </thead>
+            <tbody id="costingTableBody">
+                <!-- Rows will be added dynamically -->
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Modal for choosing month -->
+    <div id="monthModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Choose Month to Archive</h2>
+            <label for="archiveMonth">Select Month:</label>
+            <select id="archiveMonth">
+                <option value="">--Select Month--</option>
+                <option value="January">January</option>
+                <option value="February">February</option>
+                <option value="March">March</option>
+                <option value="April">April</option>
+                <option value="May">May</option>
+                <option value="June">June</option>
+                <option value="July">July</option>
+                <option value="August">August</option>
+                <option value="September">September</option>
+                <option value="October">October</option>
+                <option value="November">November</option>
+                <option value="December">December</option>
+            </select>
+            <input type="number" id="archiveYear" placeholder="Enter Year (e.g. 2025)" required>
+            <button id="archiveMonthBtn">Archive</button>
+        </div>
+    </div>
+<!-- Include jsPDF Library -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<!-- Include jsPDF Library -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<script>
+    const { jsPDF } = window.jspdf;
+    const form = document.getElementById('costingForm');
+    const toggleFormBtn = document.getElementById('toggleFormBtn');
+    const projectCostingBtn = document.getElementById('projectCostingBtn');
+    const archiveBtn = document.getElementById('archiveBtn'); // Archive button reference
+    const totalPurchasesDisplay = document.getElementById('totalPurchases');
+    const taskSelect = document.getElementById('taskSelect');
+    const taskSpending = document.getElementById('taskSpending');
+    const monthModal = document.getElementById('monthModal');
+    const closeModal = document.getElementsByClassName('close')[0];
+    const archiveMonthSelect = document.getElementById('archiveMonth');
+    const archiveYearInput = document.getElementById('archiveYear');
+    const archiveMonthBtn = document.getElementById('archiveMonthBtn');
+    let totalPurchases = 0;
+    let taskTotals = {}; // Object to store totals per task
+
+    // Toggle form visibility
+    toggleFormBtn.addEventListener('click', () => {
+        if (form.style.display === 'none' || form.style.display === '') {
+            form.style.display = 'block';
+            toggleFormBtn.textContent = 'Hide Form';
+        } else {
+            form.style.display = 'none';
+            toggleFormBtn.textContent = 'Add New Entry';
+        }
+    });
+
+    // Handle "Project Costing" button
+    projectCostingBtn.addEventListener('click', () => {
+        alert('This button is linked to Project Costing functionality!');
+    });
+
+    // Handle "Archive Monthly Purchases" button click
+    archiveBtn.addEventListener('click', () => {
+        monthModal.style.display = "block"; // Show modal to select month
+    });
+
+    // Close modal
+    closeModal.addEventListener('click', () => {
+        monthModal.style.display = "none"; // Close modal
+    });
+
+    // Archive month selection and generate PDF
+    archiveMonthBtn.addEventListener('click', () => {
+        const selectedMonth = archiveMonthSelect.value;
+        const selectedYear = archiveYearInput.value;
+        if (selectedMonth && selectedYear) {
+            const doc = new jsPDF('landscape', 'mm', 'a4'); // Use 'mm' and 'a4' for better scaling
+
+            // Set margins to ensure content fits on the page
+            const margin = 10;
+            doc.setPage(1);
+            doc.setFontSize(18);
+            doc.text(`Monthly Purchases for ${selectedMonth}${selectedYear}`, margin, 20);
+
+            // Table headers with adjusted positions
+            const headerY = 30;
+            doc.setFontSize(10);
+            doc.text('DATE', margin + 0, headerY);
+            doc.text('PROJECT NAME', margin + 30, headerY);
+            doc.text('PARTICULAR', margin + 60, headerY);
+            doc.text('TASK', margin + 90, headerY);
+            doc.text('SUPPLIER', margin + 120, headerY);
+            doc.text('VAT', margin + 160, headerY);
+            doc.text('PAYEE', margin + 180, headerY);
+            doc.text('QTY', margin + 210, headerY);
+            doc.text('AMOUNT', margin + 230, headerY);
+            doc.text('TOTAL', margin + 250, headerY);
+
+            // Table rows
+            const tableBody = document.getElementById('costingTableBody');
+            let y = headerY + 10; // Adjusted Y position for rows
+
+            [...tableBody.rows].forEach(row => {
+                let cells = row.cells;
+                doc.text(cells[0].textContent, margin + 0, y);
+                doc.text(cells[1].textContent, margin + 30, y);
+                doc.text(cells[2].textContent, margin + 60, y);
+                doc.text(cells[3].textContent, margin + 90, y);
+                doc.text(cells[4].textContent, margin + 120, y);
+                doc.text(cells[5].textContent, margin + 160, y);
+                doc.text(cells[6].textContent, margin + 180, y);
+                doc.text(cells[7].textContent, margin + 210, y);
+                doc.text(cells[8].textContent, margin + 230, y);
+                doc.text(cells[9].textContent, margin + 250, y);
+                y += 8; // Space between rows
+            });
+
+            // Save the PDF
+            doc.save(`Purchases_${selectedMonth}${selectedYear}.pdf`);
+
+            monthModal.style.display = "none"; // Close modal
+            alert(`Purchases for ${selectedMonth} ${selectedYear} have been archived as PDF!`);
+        } else {
+            alert('Please select a month and enter a valid year.');
+        }
+    });
+
+    // Add entry to table when "Add Entry" is clicked
+    document.getElementById('addRowBtn').addEventListener('click', function () {
+        const date = document.getElementById('date').value;
+        const particular = document.getElementById('particular').value;
+        const task = document.getElementById('task').value;
+        const supplier = document.getElementById('supplier').value;
+        const vat = document.getElementById('vat').value;
+        const project = document.getElementById('project').value;
+        const payee = document.getElementById('payee').value;
+        const qty = document.getElementById('qty').value;
+        const amount = document.getElementById('amount').value;
+
+        if (date && particular && task && supplier && project && payee && qty && amount) {
+            const total = (parseFloat(qty) * parseFloat(amount)).toFixed(2);
+            const tableBody = document.getElementById('costingTableBody');
+
+            // Add new row to the table
+            const newRow = tableBody.insertRow();
+            newRow.innerHTML = `
+                <td>${date}</td>
+                <td>${Taskid}</td>
+                <td>${project}</td>
+                <td>${particular}</td>
+                <td>${task}</td>
+                <td>${supplier}</td>
+                <td>${vat}</td>
+                <td>${payee}</td>
+                <td>${qty}</td>
+                <td>${amount}</td>
+                <td>${total}</td>
+            `;
+
+            // Update total purchases
+            totalPurchases += parseFloat(total);
+            totalPurchasesDisplay.textContent = `ZMW ${totalPurchases.toFixed(2)}`;
+
+            // Add task to taskSelect dropdown if it's a new task
+            if (!taskTotals[task]) {
+                taskTotals[task] = 0;
+                const option = document.createElement('option');
+                option.value = task;
+                option.textContent = task;
+                taskSelect.appendChild(option);
+            }
+
+            // Update task-specific total
+            taskTotals[task] += parseFloat(total);
+            taskSelect.addEventListener('change', function () {
+                const selectedTask = taskSelect.value;
+                if (selectedTask) {
+                    taskSpending.textContent = `Total for ${selectedTask}: ZMW ${taskTotals[selectedTask].toFixed(2)}`;
+                } else {
+                    taskSpending.textContent = '';
+                }
+            });
+
+            // Clear form fields after adding
+            form.reset();
+        } else {
+            alert('Please fill in all fields');
+        }
+    });
+</script>
+<script>let taskCounter = 1; // Counter to generate unique task IDs
+  let taskData = {}; // Object to store task-specific data
+  
+  document.getElementById('addRowBtn').addEventListener('click', function () {
+      const date = document.getElementById('date').value;
+      const particular = document.getElementById('particular').value;
+      const task = document.getElementById('task').value;
+      const supplier = document.getElementById('supplier').value;
+      const vat = document.getElementById('vat').value;
+      const project = document.getElementById('project').value;
+      const payee = document.getElementById('payee').value;
+      const qty = parseInt(document.getElementById('qty').value, 10);
+      const amount = parseFloat(document.getElementById('amount').value);
+      const total = qty * amount;
+  
+      if (date && particular && task && supplier && project && payee && !isNaN(qty) && !isNaN(amount)) {
+          // Generate a unique task ID
+          const taskId = `T-${taskCounter}`;
+          taskCounter++;
+  
+          // Add the task to the table
+          const tableBody = document.getElementById('costingTableBody');
+          const row = tableBody.insertRow();
+          row.innerHTML = `
+              <td>${date}</td>
+              <td>${taskId}</td>
+              <td>${project}</td>
+              <td>${particular}</td>
+              <td>${task}</td>
+              <td>${supplier}</td>
+              <td>${vat}</td>
+              <td>${payee}</td>
+              <td>${qty}</td>
+              <td>${amount.toFixed(2)}</td>
+              <td>${total.toFixed(2)}</td>
+          `;
+  
+          // Add task to the dropdown for viewing costs
+          const option = document.createElement('option');
+          option.value = taskId;
+          option.textContent = `${taskId} - ${task}`;
+          taskSelect.appendChild(option);
+  
+          // Update total purchases
+          totalPurchases += total;
+          totalPurchasesDisplay.textContent = `ZMW ${totalPurchases.toFixed(2)}`;
+  
+          // Store task data for costing
+          taskData[taskId] = { task, total, project };
+  
+          // Reset form fields
+          form.reset();
+      } else {
+          alert('Please fill out all fields correctly.');
+      }
+  });
+  
+  // Display project costing when a task is selected
+  taskSelect.addEventListener('change', function () {
+      const selectedTaskId = this.value;
+      if (selectedTaskId && taskData[selectedTaskId]) {
+          const taskInfo = taskData[selectedTaskId];
+          taskSpending.innerHTML = `
+              <p><strong>Task:</strong> ${taskInfo.task}</p>
+              <p><strong>Project:</strong> ${taskInfo.project}</p>
+              <p><strong>Total Cost:</strong> ZMW ${taskInfo.total.toFixed(2)}</p>
+          `;
+      } else {
+          taskSpending.innerHTML = '';
+      }
+  });
+  </script>
+
+
+</body>
+</html>

@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Task Manager</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px;
+        }
+
+        th, td {
+            padding: 12px;
+            border: 1px solid #ccc;
+            text-align: left;
+        }
+
+        th {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        td {
+            background-color: white;
+        }
+
+        td[contenteditable="true"]:hover {
+            background-color: #f1f1f1;
+        }
+    </style>
+</head>
+<body>
+    <table id="taskTable">
+        <thead>
+            <tr>
+                <th>Task Mode</th>
+                <th>Task Name</th>
+                <th>Location</th>
+                <th>Duration</th>
+                <th>Start</th>
+                <th>Finish</th>
+                <th>Resource Names</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td contenteditable="true">Edit</td>
+                <td contenteditable="true">Task Name</td>
+                <td contenteditable="true">Location</td>
+                <td contenteditable="true">Duration</td>
+                <td contenteditable="true">Start</td>
+                <td contenteditable="true">Finish</td>
+                <td contenteditable="true">Resources</td>
+            </tr>
+            <!-- Additional rows can be added here -->
+        </tbody>
+    </table>
+
+    <script>
+        // Auto-save functionality
+        document.querySelectorAll('[contenteditable="true"]').forEach(cell => {
+            cell.addEventListener('input', function() {
+                localStorage.setItem('taskTableData', JSON.stringify(getTableData()));
+            });
+        });
+
+        // Function to get all table data
+        function getTableData() {
+            const table = document.getElementById('taskTable');
+            let data = [];
+            for (let row of table.rows) {
+                let rowData = [];
+                for (let cell of row.cells) {
+                    rowData.push(cell.innerText);
+                }
+                data.push(rowData);
+            }
+            return data;
+        }
+
+        // Function to load data from localStorage when the page is loaded
+        window.onload = function() {
+            const savedData = JSON.parse(localStorage.getItem('taskTableData'));
+            if (savedData) {
+                const table = document.getElementById('taskTable');
+                for (let i = 0; i < savedData.length; i++) {
+                    const row = table.insertRow(i + 1); // Start from row 1 to skip header
+                    for (let j = 0; j < savedData[i].length; j++) {
+                        row.insertCell(j).innerText = savedData[i][j];
+                    }
+                }
+            }
+        };
+    </script>
+</body>
+</html>

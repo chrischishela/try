@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Task Manager</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px;
+        }
+
+        th, td {
+            padding: 12px;
+            border: 1px solid #ccc;
+            text-align: left;
+        }
+
+        th {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .form-container {
+            margin: 20px;
+            display: none;
+        }
+
+        input[type="text"] {
+            padding: 8px;
+            margin: 5px;
+            width: 200px;
+        }
+
+        button {
+            padding: 8px 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        #toggleButton {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            margin: 10px 0;
+        }
+
+        #toggleButton:hover {
+            background-color: #45a049;
+        }
+
+        #searchInput {
+            padding: 8px;
+            margin: 20px 0;
+            width: 200px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+    </style>
+</head>
+<body>
+
+    <button id="toggleButton">Add Employee</button>
+
+    <input type="text" id="searchInput" placeholder="Search employees by name, ID, etc." onkeyup="searchTable()">
+
+    <div class="form-container" id="formContainer">
+        <h2>Add New Employee</h2>
+        <form id="employeeForm">
+            <input type="text" id="staffId" placeholder="Staff ID" required>
+            <input type="text" id="name" placeholder="Name" required>
+            <input type="text" id="surname" placeholder="Surname" required>
+            <input type="text" id="location" placeholder="Current Work Location" required>
+            <input type="text" id="position" placeholder="Position" required>
+            <button type="submit">Add Employee</button>
+        </form>
+    </div>
+
+    <table id="employeeTable">
+        <thead>
+            <tr>
+                <th>Staff ID</th>
+                <th>Name</th>
+                <th>Surname</th>
+                <th>Current Work Location</th>
+                <th>Position</th>
+                <th>Status</th>
+                <th>Assign/Unassign Task</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Employee rows will be dynamically added here -->
+        </tbody>
+    </table>
+
+    <script>
+        // Load stored employees from localStorage
+        function loadEmployees() {
+            const employees = JSON.parse(localStorage.getItem('employees')) || [];
+            const tableBody = document.getElementById('employeeTable').getElementsByTagName('tbody')[0];
+            tableBody.innerHTML = ''; // Clear existing rows
+
+            employees.forEach(employee => {
+                const newRow = tableBody.insertRow();
+                newRow.insertCell(0).innerText = employee.staffId;
+                newRow.insertCell(1).innerText = employee.name;
+                newRow.insertCell(2).innerText = employee.surname;
+                newRow.insertCell(3).innerText = employee.location;
+                newRow.insertCell(4).innerText = employee.position;
+                newRow.insertCell(5).innerText = employee.status || 'Unassigned'; // Default to "Unassigned" if not set
+                
+                // Add Assign/Unassign Task button
+                const toggleButtonCell = newRow.insertCell(6);
+                const toggleButton = document.createElement('button');
+                toggleButton.innerText = employee.status === 'Assigned' ? 'Unassign Task' : 'Assign Task';
+                toggleButton.onclick = function() {
+                    toggleTaskStatus(employee.staffId);
+                };
+                toggleButtonCell.appendChild(toggleButton);
+            });
+
+            console.log("Loaded employees from localStorage:", employees); // Debugging log
+        }
+
+        // Toggle the "Add Employee" form
+        document.getElementById('toggleButton').addEventListener('click', function () {
+            const formContainer = document.getElementById('formContainer');
+            formContainer.style.display = (formContainer.style.display === 'none' || formContainer.style.display === '') ? 'block' : 'none';
+        });
+
+        // Add new employee
+        document.getElementById('employeeForm').addEventListener('submit', function (event) {
+            event.preventDefault();
+            const staffId = document.getElementById('staffId').value;
+            const name = document.getElementById('name').value;
+            const surname = document.getElementById('surname').value;
+            const location = document.getElementById('location').value;
+            const position = document.getElementById('position').value;
+
+            const newEmployee = {
+                staffId,
+                name,
+                surname,
+                location,
+                position,
+                status: 'Unassigned'
+            };
+
+            // Get existing employees from localStorage
+            const employees = JSON.parse(localStorage.getItem('employees')) || [];
+            employees.push(newEmployee);
+
+            // Save the updated employees to localStorage
+            localStorage.setItem('employees', JSON.stringify(employees));
+
+            // Reload the employee table
+            loadEmployees();
+
+            // Reset form and hide it
+            document.getElementById('employeeForm').reset();
+            document.getElementById('formContainer').style.display = 'none';
+        });
+
+        // Toggle task assignment status
+        function toggleTaskStatus(staffId) {
+            const employees = JSON.parse(localStorage.getItem('employees')) || [];
+            const employee = employees.find(emp => emp.staffId === staffId);
+
+            if (employee) {
+                // Toggle the status between Assigned and Unassigned
+                employee.status = employee.status === 'Assigned' ? 'Unassigned' : 'Assigned';
+
+                // Save updated employees list to localStorage
+                localStorage.setItem('employees', JSON.stringify(employees));
+
+                // Reload employee table to reflect updated status
+                loadEmployees();
+            } else {
+                alert('Employee not found.');
+            }
+        }
+
+        // Search table
+        function searchTable() {
+            const input = document.getElementById('searchInput');
+            const filter = input.value.toLowerCase();
+            const table = document.getElementById('employeeTable');
+            const rows = table.getElementsByTagName('tr');
+            for (let i = 1; i < rows.length; i++) {
+                const cells = rows[i].getElementsByTagName('td');
+                let rowMatches = false;
+                for (let cell of cells) {
+                    if (cell.innerText.toLowerCase().includes(filter)) {
+                        rowMatches = true;
+                        break;
+                    }
+                }
+                rows[i].style.display = rowMatches ? '' : 'none';
+            }
+        }
+
+        // Initialize the page by loading existing employees
+        loadEmployees();
+    </script>
+</body>
+</html>
